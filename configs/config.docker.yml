@@ -1,0 +1,30 @@
+# -------------------------------------------------------
+# Конфиг для запуска через Docker (docker compose up)
+# Отличается только database.url — указывает на контейнер postgres
+# -------------------------------------------------------
+
+telegram:
+  app_id: 12345678              # ← App api_id с my.telegram.org/apps
+  app_hash: "your_app_hash"     # ← App api_hash с my.telegram.org/apps
+  phone: "+79001234567"         # ← номер телефона аккаунта
+
+database:
+  url: "postgres://tg_monitor:tg_monitor_pass@postgres:5432/tg_monitor?sslmode=disable"
+
+keywords:
+  - куплю
+  - продам
+  - ищу
+  - нужен
+  - отдам
+  - сдам
+
+sources:
+  forums:
+    - https://t.me/gantsevichi_obyavleniya
+
+  chats:
+    - some_channel
+
+export:
+  dir: "/app/exports"           # внутри контейнера → снаружи папка ./exports

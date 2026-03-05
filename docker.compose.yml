@@ -1,0 +1,44 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tg_monitor
+      POSTGRES_USER: tg_monitor
+      POSTGRES_PASSWORD: tg_monitor_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tg_monitor"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  monitor:
+    build: .
+    command: /app/monitor /app/config.docker.yml
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./config.docker.yml:/app/config.docker.yml:ro
+      - ./.session:/app/.session
+    stdin_open: true   # для ввода кода при первой авторизации
+    tty: true
+
+  # Запуск: docker compose run --rm export
+  export:
+    build: .
+    command: /app/export /app/config.docker.yml
+    profiles: ["export"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./config.docker.yml:/app/config.docker.yml:ro
+      - ./exports:/app/exports
+
+volumes:
+  postgres_data:
