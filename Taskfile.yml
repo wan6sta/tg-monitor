@@ -1,0 +1,64 @@
+version: '3'
+
+tasks:
+  default:
+    desc: "Показать список задач"
+    cmds:
+      - task --list
+
+  run:
+    desc: "Запустить мониторинг"
+    cmds:
+      - go run ./cmd/main.go run {{.CLI_ARGS}}
+
+  export:
+    desc: "Экспортировать результаты в xlsx"
+    cmds:
+      - go run ./cmd/main.go export {{.CLI_ARGS}}
+
+  build:
+    desc: "Собрать бинарники под все платформы в ./bin"
+    cmds:
+      - mkdir -p bin
+      - cmd: GOOS=darwin  GOARCH=arm64 go build -ldflags="-s -w" -o bin/monitor-darwin-arm64  ./cmd/main.go
+      - cmd: GOOS=darwin  GOARCH=amd64 go build -ldflags="-s -w" -o bin/monitor-darwin-amd64  ./cmd/main.go
+      - cmd: GOOS=linux   GOARCH=amd64 go build -ldflags="-s -w" -o bin/monitor-linux-amd64   ./cmd/main.go
+      - cmd: GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o bin/monitor-windows-amd64.exe ./cmd/main.go
+      - cmd: echo Done
+
+  build:local:
+    desc: "Собрать бинарник под текущую платформу"
+    cmds:
+      - mkdir -p bin
+      - cmd: go build -ldflags="-s -w" -o bin/monitor ./cmd/main.go
+      - cmd: echo Done
+
+  lint:
+    desc: "Запустить golangci-lint"
+    cmds:
+      - golangci-lint run ./...
+
+  fmt:
+    desc: "Форматировать код"
+    cmds:
+      - gofmt -w .
+
+  tidy:
+    desc: "go mod tidy"
+    cmds:
+      - go mod tidy
+
+  db:show:
+    desc: "Показать последние 20 сообщений"
+    cmds:
+      - sqlite3 monitor.db "SELECT datetime(sent_at), chat_title, topic_title, sender_name, keyword, substr(text,1,80) FROM messages ORDER BY sent_at DESC LIMIT 20;"
+
+  db:count:
+    desc: "Количество сообщений по ключевым словам"
+    cmds:
+      - sqlite3 monitor.db "SELECT keyword, count(*) FROM messages GROUP BY keyword ORDER BY count(*) DESC;"
+
+  db:reset:
+    desc: "Удалить базу данных"
+    cmds:
+      - rm -f monitor.db

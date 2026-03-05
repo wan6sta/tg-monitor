@@ -7,9 +7,10 @@ telegram:
   app_id: 12345678              # ← App api_id с my.telegram.org/apps
   app_hash: "your_app_hash"     # ← App api_hash с my.telegram.org/apps
   phone: "+79001234567"         # ← номер телефона аккаунта
+  password: "your_2fa_password"          # ← пароль аккаунта
 
 database:
-  url: "postgres://tg_monitor:tg_monitor_pass@postgres:5432/tg_monitor?sslmode=disable"
+  path: "monitor.db"   # файл SQLite, создаётся автоматически
 
 keywords:
   - куплю
